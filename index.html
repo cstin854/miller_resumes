@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Randomization Test Simulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -22,278 +23,112 @@
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transition: all 0.3s ease;
-            opacity: 0;
-            animation: fadeIn 0.3s forwards;
+            user-select: none;
         }
 
+        /* Specific card styles */
         .card-john {
-            background-color: #111827; /* gray-900 */
+            background-color: #0f172a; /* slate-900 */
             color: #ffffff;
+            border: 2px solid #0f172a;
         }
 
         .card-jenn {
             background-color: #ffffff;
-            color: #111827; /* gray-900 */
-            border: 2px solid #111827;
+            color: #0f172a;
+            border: 2px solid #cbd5e1; /* slate-300 */
         }
 
-        .card.highlighted {
+        /* Highlight state when processed */
+        .card.processed {
             background-color: #ef4444 !important; /* red-500 */
             color: #ffffff !important;
             border-color: #ef4444 !important;
             transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
         }
 
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Entrance animation for results */
-        .fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 text-gray-800 flex flex-col items-center">
+<body class="min-h-screen p-4 md:p-8 text-slate-800 flex flex-col items-center">
 
-    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
         
-        <!-- Header -->
-        <div class="bg-gray-50 border-b border-gray-200 p-6 text-center">
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Randomization Test</h1>
-            <p class="text-gray-500 mt-2">Permutation test demonstrating the difference in means</p>
+        <div class="bg-indigo-600 p-6 text-center text-white">
+            <h1 class="text-3xl font-extrabold tracking-tight">Randomization Test Simulator</h1>
+            <p class="text-indigo-200 mt-2 font-medium">Permutation test demonstrating the difference in means</p>
         </div>
 
         <div class="p-6 space-y-8">
             
-            <!-- Original Sets -->
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Data Entry
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">John's Ratings (comma separated)</label>
+                        <input type="text" id="input-john" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" value="6, 8, 7, 6, 9, 10, 5, 6">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">Jenn's Ratings (comma separated)</label>
+                        <input type="text" id="input-jenn" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" value="4, 5, 6, 4, 7, 4, 5, 5">
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <button id="update-btn" class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg shadow transition-all active:scale-95">
+                        Apply / Update Sets
+                    </button>
+                    <span id="error-msg" class="text-red-500 font-medium text-sm hidden"></span>
+                </div>
+            </div>
+
             <div class="space-y-6">
                 <!-- John's Original -->
                 <div class="space-y-2">
                     <div class="flex justify-between items-end">
-                        <h2 class="text-lg font-bold text-gray-700">Ratings for John</h2>
-                        <span class="text-sm font-semibold text-gray-500">Original Mean: 5.875</span>
+                        <h2 class="text-lg font-bold text-slate-700">Ratings for John</h2>
                     </div>
-                    <div id="john-original" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-xl min-h-[6rem] items-center">
-                        <!-- Cards injected via JS -->
+                    <div id="john-original" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[6.5rem] items-center border border-slate-200 shadow-inner">
+                        <!-- JS injected cards -->
                     </div>
                 </div>
 
                 <!-- Jenn's Original -->
                 <div class="space-y-2">
                     <div class="flex justify-between items-end">
-                        <h2 class="text-lg font-bold text-gray-700">Ratings for Jenn</h2>
-                        <span class="text-sm font-semibold text-gray-500">Original Mean: 4.750</span>
+                        <h2 class="text-lg font-bold text-slate-700">Ratings for Jenn</h2>
                     </div>
-                    <div id="jenn-original" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-xl min-h-[6rem] items-center">
-                        <!-- Cards injected via JS -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-center py-4 border-y border-gray-100">
-                <button id="simulate-btn" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center space-x-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    <span>Simulate Randomization</span>
-                </button>
-            </div>
-
-            <!-- Randomized Sets -->
-            <div class="space-y-6">
-                <!-- John's Randomized -->
-                <div class="space-y-2">
-                    <h2 class="text-lg font-bold text-blue-700">John's Randomized Scores</h2>
-                    <div id="john-random" class="flex flex-wrap gap-3 p-4 bg-blue-50 rounded-xl min-h-[6.5rem] items-center border border-blue-100 transition-colors">
-                        <!-- Cards injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Jenn's Randomized -->
-                <div class="space-y-2">
-                    <h2 class="text-lg font-bold text-pink-700">Jenn's Randomized Scores</h2>
-                    <div id="jenn-random" class="flex flex-wrap gap-3 p-4 bg-pink-50 rounded-xl min-h-[6.5rem] items-center border border-pink-100 transition-colors">
-                        <!-- Cards injected via JS -->
+                    <div id="jenn-original" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[6.5rem] items-center border border-slate-200 shadow-inner">
+                        <!-- JS injected cards -->
                     </div>
                 </div>
             </div>
 
-            <div id="results-container" class="hidden opacity-0 p-6 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-2xl shadow-inner text-center">
-                <h3 class="text-xl font-bold mb-4 text-gray-300 uppercase tracking-wider text-sm">Simulation Results</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white/10 rounded-xl p-4 flex flex-col justify-center">
-                        <span class="text-gray-400 text-sm mb-1">John's Random Mean</span>
-                        <span id="res-john-mean" class="text-3xl font-mono font-bold text-blue-300">0.000</span>
-                    </div>
-                    <div class="bg-white/10 rounded-xl p-4 flex flex-col justify-center">
-                        <span class="text-gray-400 text-sm mb-1">Jenn's Random Mean</span>
-                        <span id="res-jenn-mean" class="text-3xl font-mono font-bold text-pink-300">0.000</span>
-                    </div>
-                    <div class="bg-blue-600/30 border border-blue-500/50 rounded-xl p-4 flex flex-col justify-center">
-                        <span class="text-blue-200 text-sm mb-1">Difference (John - Jenn)</span>
-                        <span id="res-diff" class="text-4xl font-mono font-black text-white">0.000</span>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100 text-center">
+                <div>
+                    <span class="block text-indigo-700 text-xs font-bold uppercase tracking-wider mb-1">Original John Mean</span>
+                    <span id="orig-john-mean" class="text-2xl font-mono font-black text-indigo-900">--</span>
+                </div>
+                <div>
+                    <span class="block text-indigo-700 text-xs font-bold uppercase tracking-wider mb-1">Original Jenn Mean</span>
+                    <span id="orig-jenn-mean" class="text-2xl font-mono font-black text-indigo-900">--</span>
+                </div>
+                <div class="bg-indigo-600 rounded-lg p-2 md:-my-2 flex flex-col justify-center shadow-md">
+                    <span class="block text-indigo-200 text-xs font-bold uppercase tracking-wider mb-1">Original Difference (John-Jenn)</span>
+                    <span id="orig-diff" class="text-3xl font-mono font-black text-white">--</span>
                 </div>
             </div>
 
-        </div>
-    </div>
-
-    <script>
-        const johnOriginalData = [2,3,5,6,7,8,8,8];
-        const jennOriginalData = [3,3,4,4,4,5,7,8];
-        
-        let allOriginalCards = [];
-        let simulationId = 0; // To track and cancel overlapping simulations
-
-        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-        // Format numbers cleanly
-        const formatNum = num => Number.isInteger(num) ? num + ".000" : num.toFixed(3);
-
-        function createCardDOM(value, source) {
-            const card = document.createElement('div');
-            card.className = `card card-${source}`;
-            card.textContent = value;
-            return card;
-        }
-
-        function initializeBoard() {
-            const johnContainer = document.getElementById('john-original');
-            const jennContainer = document.getElementById('jenn-original');
-            
-            johnContainer.innerHTML = '';
-            jennContainer.innerHTML = '';
-            allOriginalCards = [];
-
-            // Populate John
-            johnOriginalData.forEach((val, idx) => {
-                const domEl = createCardDOM(val, 'john');
-                johnContainer.appendChild(domEl);
-                allOriginalCards.push({ value: val, source: 'john', element: domEl, used: false });
-            });
-
-            // Populate Jenn
-            jennOriginalData.forEach((val, idx) => {
-                const domEl = createCardDOM(val, 'jenn');
-                jennContainer.appendChild(domEl);
-                allOriginalCards.push({ value: val, source: 'jenn', element: domEl, used: false });
-            });
-        }
-
-        function resetBoard() {
-            // Remove highlighted states
-            allOriginalCards.forEach(card => {
-                card.used = false;
-                card.element.classList.remove('highlighted');
-            });
-
-            // Clear randomized containers
-            document.getElementById('john-random').innerHTML = '';
-            document.getElementById('jenn-random').innerHTML = '';
-
-            // Hide results
-            const resultsContainer = document.getElementById('results-container');
-            resultsContainer.classList.add('hidden');
-            resultsContainer.classList.remove('fade-in-up', 'opacity-100');
-        }
-
-        async function runSimulation() {
-            // Cancel any running simulation and increment ID
-            const currentSimId = ++simulationId;
-            
-            const btn = document.getElementById('simulate-btn');
-            const btnText = btn.querySelector('span');
-            btnText.textContent = "Restarting...";
-            
-            resetBoard();
-
-            // Setup state for new run
-            let pool = [...allOriginalCards];
-            let johnRandomScores = [];
-            let jennRandomScores = [];
-            const MAX_CAPACITY = 8;
-            
-            await sleep(200); // Tiny pause before starting fresh
-            if (currentSimId !== simulationId) return; // Abort if user clicked again
-            btnText.textContent = "Simulating...";
-
-            // Process the pool
-            while (pool.length > 0) {
-                if (currentSimId !== simulationId) return; // Abort check
-                
-                await sleep(350); // Snappy visual processing delay
-
-                // Pick a random card from remaining pool
-                const randIndex = Math.floor(Math.random() * pool.length);
-                const pickedCard = pool.splice(randIndex, 1)[0];
-                
-                // Highlight original card
-                pickedCard.element.classList.add('highlighted');
-                pickedCard.used = true;
-
-                // Determine destination
-                let target;
-                if (johnRandomScores.length >= MAX_CAPACITY) {
-                    target = 'jenn';
-                } else if (jennRandomScores.length >= MAX_CAPACITY) {
-                    target = 'john';
-                } else {
-                    target = Math.random() < 0.5 ? 'john' : 'jenn';
-                }
-
-                // Append clone to target
-                if (target === 'john') {
-                    johnRandomScores.push(pickedCard.value);
-                    const newCard = createCardDOM(pickedCard.value, pickedCard.source);
-                    document.getElementById('john-random').appendChild(newCard);
-                } else {
-                    jennRandomScores.push(pickedCard.value);
-                    const newCard = createCardDOM(pickedCard.value, pickedCard.source);
-                    document.getElementById('jenn-random').appendChild(newCard);
-                }
-            }
-
-            if (currentSimId !== simulationId) return; // Final abort check before results
-
-            // Calculate means
-            const sumJohn = johnRandomScores.reduce((a, b) => a + b, 0);
-            const sumJenn = jennRandomScores.reduce((a, b) => a + b, 0);
-            
-            const meanJohn = sumJohn / MAX_CAPACITY;
-            const meanJenn = sumJenn / MAX_CAPACITY;
-            const diff = meanJohn - meanJenn;
-
-            // Display results
-            document.getElementById('res-john-mean').textContent = formatNum(meanJohn);
-            document.getElementById('res-jenn-mean').textContent = formatNum(meanJenn);
-            
-            const diffEl = document.getElementById('res-diff');
-            diffEl.textContent = (diff > 0 ? "+" : "") + formatNum(diff);
-            
-            // Highlight color based on difference polarity
-            diffEl.className = `text-4xl font-mono font-black ${diff >= 0 ? 'text-green-400' : 'text-red-400'}`;
-
-            const resultsContainer = document.getElementById('results-container');
-            resultsContainer.classList.remove('hidden');
-            // Trigger reflow to restart animation
-            void resultsContainer.offsetWidth;
-            resultsContainer.classList.add('fade-in-up', 'opacity-100');
-
-            btnText.textContent = "Simulate Again";
-        }
-
-        document.getElementById('simulate-btn').addEventListener('click', () => {
-            runSimulation();
-        });
-
-        // Initialize board on load
-        initializeBoard();
-
-    </script>
-</body>
-</html>
+            <div class="flex justify-center py-2">
+                <button id="simulate-btn" class="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-lg font-bold rounded-full shadow-lg shadow-emerald-500/40 transition-all active:scale-95 flex items-center space-x-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a
