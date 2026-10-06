@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randomization Test Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .card {
+            width: 3.5rem;
+            height: 4.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        /* Specific card styles */
+        .card-john {
+            background-color: #0f172a; /* slate-900 */
+            color: #ffffff;
+            border: 2px solid #0f172a;
+        }
+
+        .card-jenn {
+            background-color: #ffffff;
+            color: #0f172a;
+            border: 2px solid #cbd5e1; /* slate-300 */
+        }
+
+        /* Highlight state when processed */
+        .card.processed {
+            background-color: #ef4444 !important; /* red-500 */
+            color: #ffffff !important;
+            border-color: #ef4444 !important;
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 text-slate-800 flex flex-col items-center">
+
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        
+        <div class="bg-indigo-600 p-6 text-center text-white">
+            <h1 class="text-3xl font-extrabold tracking-tight">Randomization Test Simulator</h1>
+            <p class="text-indigo-200 mt-2 font-medium">Permutation test demonstrating the difference in means</p>
+        </div>
+
+        <div class="p-6 space-y-8">
+            
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Data Entry
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">John's Ratings (comma separated)</label>
+                        <input type="text" id="input-john" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" value="6, 8, 7, 6, 9, 10, 5, 6">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">Jenn's Ratings (comma separated)</label>
+                        <input type="text" id="input-jenn" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" value="4, 5, 6, 4, 7, 4, 5, 5">
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <button id="update-btn" class="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg shadow transition-all active:scale-95">
+                        Apply / Update Sets
+                    </button>
+                    <span id="error-msg" class="text-red-500 font-medium text-sm hidden"></span>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- John's Original -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-end">
+                        <h2 class="text-lg font-bold text-slate-700">Ratings for John</h2>
+                    </div>
+                    <div id="john-original" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[6.5rem] items-center border border-slate-200 shadow-inner">
+                        <!-- JS injected cards -->
+                    </div>
+                </div>
+
+                <!-- Jenn's Original -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-end">
+                        <h2 class="text-lg font-bold text-slate-700">Ratings for Jenn</h2>
+                    </div>
+                    <div id="jenn-original" class="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-xl min-h-[6.5rem] items-center border border-slate-200 shadow-inner">
+                        <!-- JS injected cards -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100 text-center">
+                <div>
+                    <span class="block text-indigo-700 text-xs font-bold uppercase tracking-wider mb-1">Original John Mean</span>
+                    <span id="orig-john-mean" class="text-2xl font-mono font-black text-indigo-900">--</span>
+                </div>
+                <div>
+                    <span class="block text-indigo-700 text-xs font-bold uppercase tracking-wider mb-1">Original Jenn Mean</span>
+                    <span id="orig-jenn-mean" class="text-2xl font-mono font-black text-indigo-900">--</span>
+                </div>
+                <div class="bg-indigo-600 rounded-lg p-2 md:-my-2 flex flex-col justify-center shadow-md">
+                    <span class="block text-indigo-200 text-xs font-bold uppercase tracking-wider mb-1">Original Difference (John-Jenn)</span>
+                    <span id="orig-diff" class="text-3xl font-mono font-black text-white">--</span>
+                </div>
+            </div>
+
+            <div class="flex justify-center py-2">
+                <button id="simulate-btn" class="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-white text-lg font-bold rounded-full shadow-lg shadow-emerald-500/40 transition-all active:scale-95 flex items-center space-x-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a
